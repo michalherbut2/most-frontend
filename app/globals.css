@@ -1,26 +1,40 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 1. Konfiguracja Motywu (Zastępuje tailwind.config.js i :root) */
+@theme {
+  --color-primary: #2573a6;
+  --color-primary-dark: #1e5f8a;
+  
+  /* Uwaga: 'orange' to domyślna paleta w Tailwind. 
+     Dodałem suffix '-brand', żeby uniknąć konfliktów, 
+     używasz tego jako: bg-orange-brand / text-orange-brand */
+  --color-orange-brand: #ea580c; 
+  --color-orange-light: #fff7ed;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* 2. Style Bazowe */
+@layer base {
+  *, ::after, ::before {
+    /* Użyłem border-slate-200, bo border-border wymagałby definicji osobnej zmiennej.
+       Jeśli używasz shadcn/ui, przywróć 'border-border' i zdefiniuj zmienną w @theme */
+    @apply border-slate-200; 
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    @apply bg-slate-50 text-slate-900;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 3. Własne Utility (Nowa składnia v4) */
+@utility glass {
+  @apply bg-white/80 backdrop-blur-md;
+}
+
+@utility card {
+  @apply rounded-lg border border-slate-200 bg-white p-6;
+}
+
+@utility transition-smooth {
+  @apply transition-all duration-200 ease-in-out;
 }
