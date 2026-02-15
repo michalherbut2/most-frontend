@@ -13,6 +13,8 @@ import {
   Shield,
   Sparkles,
   Gamepad,
+  BookOpen,
+  ChefHat,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useUserRole } from "@/shared/lib/hooks/useUserRole";
@@ -38,6 +40,8 @@ const navLinks: NavLink[] = [
   },
   { href: "/team", label: "Team", icon: Users, publicAccess: true },
   { href: "/games", label: "Games", icon: Gamepad, publicAccess: false },
+  { href: "/liturgy", label: "Liturgy", icon: BookOpen, publicAccess: true },
+  { href: "/community", label: "Community", icon: ChefHat, publicAccess: true },
 ];
 
 export function Navbar() {

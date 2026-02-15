@@ -3,17 +3,24 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/Card';
-import { useAuth } from '../hooks';
+import { authApi } from '../api';
 import { ROUTES } from '@/shared/lib/constants';
 import { AlertCircle } from 'lucide-react';
 
 export function RegisterForm() {
   const router = useRouter();
-  const { register, isLoading, error, clearError } = useAuth();
-  
+
+  const registerMutation = useMutation({
+    mutationFn: authApi.register,
+    onSuccess: () => {
+      router.push(ROUTES.public.login + '?registered=true');
+    },
+  });
+
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -58,28 +65,22 @@ export function RegisterForm() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    clearError();
+    registerMutation.reset();
 
     if (!validateForm()) {
       return;
     }
 
-    try {
-      const { confirmPassword, ...registerData } = formData;
-      await register(registerData);
-      router.push(ROUTES.protected.dashboard);
-    } catch (error) {
-      // Error is handled by the store
-      console.error('Registration error:', error);
-    }
+    const { confirmPassword, ...registerData } = formData;
+    registerMutation.mutate(registerData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors((prev) => {
@@ -100,10 +101,10 @@ export function RegisterForm() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {error && (
+          {registerMutation.error && (
             <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
               <AlertCircle className="h-4 w-4" />
-              <p>{error}</p>
+              <p>{(registerMutation.error as any)?.message || 'Wystąpił błąd podczas rejestracji'}</p>
             </div>
           )}
 
@@ -172,12 +173,12 @@ export function RegisterForm() {
           <Button
             type="submit"
             fullWidth
-            isLoading={isLoading}
-            disabled={isLoading}
+            isLoading={registerMutation.isPending}
+            disabled={registerMutation.isPending}
           >
             Zarejestruj się
           </Button>
-          
+
           <p className="text-center text-sm text-muted-foreground">
             Masz już konto?{' '}
             <Link
