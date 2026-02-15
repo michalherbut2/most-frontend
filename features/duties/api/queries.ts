@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
-export type ServiceCategory = "LITURGY" | "KITCHEN" | "OTHER";
+export type DutyCategory = "LITURGY" | "KITCHEN" | "OTHER";
 export type VolunteerStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface VolunteerInfo {
@@ -15,11 +15,11 @@ export interface VolunteerInfo {
     profileImage?: string;
 }
 
-export interface ServiceSlot {
+export interface DutySlot {
     id: string;
     date: string;         // ISO date
     time: string;         // HH:mm
-    category: ServiceCategory;
+    category: DutyCategory;
     title: string;
     capacity: number;
     approvedCount: number;
@@ -31,24 +31,24 @@ export interface ServiceSlot {
 
 // ─── QUERY KEYS ──────────────────────────────────────────────────────────────
 
-export const schedulerKeys = {
-    all: ["scheduler"] as const,
-    slots: (category: ServiceCategory, dateFrom: string, dateTo: string) =>
-        [...schedulerKeys.all, "slots", category, dateFrom, dateTo] as const,
+export const dutyKeys = {
+    all: ["duties"] as const,
+    slots: (category: DutyCategory, dateFrom: string, dateTo: string) =>
+        [...dutyKeys.all, "slots", category, dateFrom, dateTo] as const,
 };
 
 // ─── HOOKS ───────────────────────────────────────────────────────────────────
 
 // 1. Pobierz sloty (filtrowane po kategorii i zakresie dat)
-export function useServiceSlots(category: ServiceCategory, dateFrom: string, dateTo: string) {
+export function useDutySlots(category: DutyCategory, dateFrom: string, dateTo: string) {
     return useQuery({
-        queryKey: schedulerKeys.slots(category, dateFrom, dateTo),
+        queryKey: dutyKeys.slots(category, dateFrom, dateTo),
         queryFn: async () => {
             // apiClient interceptor unwraps response.data automatically
-            const data = await apiClient.get("/scheduler/slots", {
+            const data = await apiClient.get("/duties/slots", {
                 params: { category, dateFrom, dateTo },
             });
-            return data as unknown as ServiceSlot[];
+            return data as unknown as DutySlot[];
         },
         enabled: !!dateFrom && !!dateTo,
     });
@@ -60,15 +60,15 @@ export function useSignUp() {
 
     return useMutation({
         mutationFn: async ({ slotId, isAnonymous }: { slotId: string; isAnonymous: boolean }) => {
-            const data = await apiClient.post<ServiceSlot>(
-                `/scheduler/slots/${slotId}/sign-up`,
+            const data = await apiClient.post<DutySlot>(
+                `/duties/slots/${slotId}/sign-up`,
                 { isAnonymous }
             );
             return data;
         },
         onSuccess: () => {
             toast.success("Zapisano na służbę! 🙌");
-            queryClient.invalidateQueries({ queryKey: schedulerKeys.all });
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
         },
         onError: () => {
             toast.error("Nie udało się zapisać na służbę.");
@@ -82,11 +82,11 @@ export function useCancelSignUp() {
 
     return useMutation({
         mutationFn: async (slotId: string) => {
-            await apiClient.delete(`/scheduler/slots/${slotId}/sign-up`);
+            await apiClient.delete(`/duties/slots/${slotId}/sign-up`);
         },
         onSuccess: () => {
             toast.success("Wypisano ze służby");
-            queryClient.invalidateQueries({ queryKey: schedulerKeys.all });
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
         },
         onError: () => {
             toast.error("Nie udało się wypisać ze służby.");
@@ -100,11 +100,11 @@ export function useConfirmPresence() {
 
     return useMutation({
         mutationFn: async (volunteerId: string) => {
-            await apiClient.patch(`/scheduler/admin/volunteers/${volunteerId}/confirm`);
+            await apiClient.patch(`/duties/admin/volunteers/${volunteerId}/confirm`);
         },
         onSuccess: () => {
             toast.success("Obecność potwierdzona ✅");
-            queryClient.invalidateQueries({ queryKey: schedulerKeys.all });
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
         },
         onError: () => {
             toast.error("Nie udało się potwierdzić obecności.");
@@ -118,8 +118,8 @@ export function useGenerateLiturgyWeek() {
 
     return useMutation({
         mutationFn: async (startMonday: string) => {
-            const data = await apiClient.post<ServiceSlot[]>(
-                "/scheduler/admin/generate/liturgy",
+            const data = await apiClient.post<DutySlot[]>(
+                "/duties/admin/generate/liturgy",
                 null,
                 { params: { startMonday } }
             );
@@ -127,7 +127,7 @@ export function useGenerateLiturgyWeek() {
         },
         onSuccess: () => {
             toast.success("Wygenerowano tydzień liturgii 📅");
-            queryClient.invalidateQueries({ queryKey: schedulerKeys.all });
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
         },
         onError: () => {
             toast.error("Nie udało się wygenerować harmonogramu.");
@@ -141,8 +141,8 @@ export function useGenerateSundayKitchen() {
 
     return useMutation({
         mutationFn: async (sunday: string) => {
-            const data = await apiClient.post<ServiceSlot>(
-                "/scheduler/admin/generate/kitchen",
+            const data = await apiClient.post<DutySlot>(
+                "/duties/admin/generate/kitchen",
                 null,
                 { params: { sunday } }
             );
@@ -150,7 +150,7 @@ export function useGenerateSundayKitchen() {
         },
         onSuccess: () => {
             toast.success("Wygenerowano slot kuchenny 🍳");
-            queryClient.invalidateQueries({ queryKey: schedulerKeys.all });
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
         },
         onError: () => {
             toast.error("Nie udało się wygenerować slotu.");

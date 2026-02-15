@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import {
-    ServiceSlot,
+    DutySlot,
     VolunteerInfo,
     useSignUp,
     useCancelSignUp,
     useConfirmPresence,
-} from "@/features/scheduler/api/queries";
+} from "@/features/duties/api/queries";
 import {
     Clock,
     Users,
@@ -24,7 +24,7 @@ import {
 // ─── Sign-Up Modal ───────────────────────────────────────────────────────────
 
 interface SignUpModalProps {
-    slot: ServiceSlot;
+    slot: DutySlot;
     onClose: () => void;
 }
 
@@ -213,12 +213,12 @@ function VolunteerChip({
 
 // ─── Main Card ───────────────────────────────────────────────────────────────
 
-interface ServiceSlotCardProps {
-    slot: ServiceSlot;
+interface DutySlotCardProps {
+    slot: DutySlot;
     isAdmin?: boolean;
 }
 
-export default function ServiceSlotCard({ slot, isAdmin = false }: ServiceSlotCardProps) {
+export default function DutySlotCard({ slot, isAdmin = false }: DutySlotCardProps) {
     const [showModal, setShowModal] = useState(false);
     const cancelMutation = useCancelSignUp();
 

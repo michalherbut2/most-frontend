@@ -2,11 +2,11 @@
 
 import React, { useMemo, useState } from "react";
 import {
-    ServiceSlot,
-    useServiceSlots,
+    DutySlot,
+    useDutySlots,
     useGenerateLiturgyWeek,
-} from "@/features/scheduler/api/queries";
-import ServiceSlotCard from "@/features/scheduler/components/ServiceSlotCard";
+} from "@/features/duties/api/queries";
+import DutySlotCard from "@/features/duties/components/DutySlotCard";
 import { useUserRole } from "@/shared/lib/hooks/useUserRole";
 import {
     ChevronLeft,
@@ -52,7 +52,7 @@ export default function LiturgySchedulerPage() {
 
     const sunday = useMemo(() => addDays(monday, 6), [monday]);
 
-    const { data: slots, isLoading, isError, refetch } = useServiceSlots(
+    const { data: slots, isLoading, isError, refetch } = useDutySlots(
         "LITURGY",
         formatISO(monday),
         formatISO(sunday)
@@ -60,10 +60,10 @@ export default function LiturgySchedulerPage() {
 
     // Grupuj sloty wg dnia tygodnia (0=Pn ... 6=Ndz)
     const slotsByDay = useMemo(() => {
-        const grouped: Record<number, ServiceSlot[]> = {};
+        const grouped: Record<number, DutySlot[]> = {};
         for (let i = 0; i < 7; i++) grouped[i] = [];
 
-        slots?.forEach((slot: ServiceSlot) => {
+        slots?.forEach((slot: DutySlot) => {
             const d = new Date(slot.date);
             const dayIdx = (d.getDay() + 6) % 7; // Pn=0, Nd=6
             grouped[dayIdx]?.push(slot);
@@ -177,10 +177,10 @@ export default function LiturgySchedulerPage() {
                             <div
                                 key={dayIdx}
                                 className={`rounded-xl border p-3 min-h-[180px] transition-colors ${isToday
-                                        ? "border-purple-300 bg-purple-50/50"
-                                        : isPast
-                                            ? "border-gray-100 bg-gray-50/50 opacity-60"
-                                            : "border-gray-200 bg-white"
+                                    ? "border-purple-300 bg-purple-50/50"
+                                    : isPast
+                                        ? "border-gray-100 bg-gray-50/50 opacity-60"
+                                        : "border-gray-200 bg-white"
                                     }`}
                             >
                                 {/* Day Header */}
@@ -200,8 +200,8 @@ export default function LiturgySchedulerPage() {
                                             {dayIdx === 5 ? "Brak mszy" : "Brak slotów"}
                                         </p>
                                     ) : (
-                                        daySlots.map((slot: ServiceSlot) => (
-                                            <ServiceSlotCard key={slot.id} slot={slot} isAdmin={isAdmin} />
+                                        daySlots.map((slot: DutySlot) => (
+                                            <DutySlotCard key={slot.id} slot={slot} isAdmin={isAdmin} />
                                         ))
                                     )}
                                 </div>

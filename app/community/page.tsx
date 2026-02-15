@@ -2,11 +2,11 @@
 
 import React, { useMemo } from "react";
 import {
-    ServiceSlot,
-    useServiceSlots,
+    DutySlot,
+    useDutySlots,
     useGenerateSundayKitchen,
-} from "@/features/scheduler/api/queries";
-import ServiceSlotCard from "@/features/scheduler/components/ServiceSlotCard";
+} from "@/features/duties/api/queries";
+import DutySlotCard from "@/features/duties/components/DutySlotCard";
 import { useUserRole } from "@/shared/lib/hooks/useUserRole";
 import {
     Loader,
@@ -46,7 +46,7 @@ export default function CommunitySchedulerPage() {
         return formatISO(d);
     }, []);
 
-    const { data: slots, isLoading, isError, refetch } = useServiceSlots(
+    const { data: slots, isLoading, isError, refetch } = useDutySlots(
         "KITCHEN",
         dateFrom,
         dateTo
@@ -55,8 +55,8 @@ export default function CommunitySchedulerPage() {
     // Grupuj sloty wg daty
     const grouped = useMemo(() => {
         if (!slots) return {};
-        const map: Record<string, ServiceSlot[]> = {};
-        slots.forEach((slot: ServiceSlot) => {
+        const map: Record<string, DutySlot[]> = {};
+        slots.forEach((slot: DutySlot) => {
             if (!map[slot.date]) map[slot.date] = [];
             map[slot.date].push(slot);
         });
@@ -150,8 +150,8 @@ export default function CommunitySchedulerPage() {
                                     </h2>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {grouped[dateStr].map((slot: ServiceSlot) => (
-                                        <ServiceSlotCard key={slot.id} slot={slot} isAdmin={isAdmin} />
+                                    {grouped[dateStr].map((slot: DutySlot) => (
+                                        <DutySlotCard key={slot.id} slot={slot} isAdmin={isAdmin} />
                                     ))}
                                 </div>
                             </div>
