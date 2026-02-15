@@ -7,6 +7,7 @@ import {
   Music,
   Trophy,
   Users,
+  UsersRound,
   LogIn,
   LogOut,
   User,
@@ -95,19 +96,34 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             {/* Admin Panel Link */}
             {isAdmin && (
-              <Link
-                href="/admin"
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
-                  pathname?.startsWith("/admin")
-                    ? "bg-purple-100 text-purple-700"
-                    : "text-slate-600 hover:bg-purple-50 hover:text-purple-700",
-                )}
-                title="Admin Panel"
-              >
-                <Shield className="h-4 w-4" />
-                <span className="hidden lg:inline">Admin</span>
-              </Link>
+              <>
+                <Link
+                  href="/admin"
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                    pathname === "/admin"
+                      ? "bg-purple-100 text-purple-700"
+                      : "text-slate-600 hover:bg-purple-50 hover:text-purple-700",
+                  )}
+                  title="Admin Panel"
+                >
+                  <Shield className="h-4 w-4" />
+                  <span className="hidden lg:inline">Admin</span>
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                    pathname === "/admin/users"
+                      ? "bg-purple-100 text-purple-700"
+                      : "text-slate-600 hover:bg-purple-50 hover:text-purple-700",
+                  )}
+                  title="Użytkownicy"
+                >
+                  <UsersRound className="h-4 w-4" />
+                  <span className="hidden lg:inline">Użytkownicy</span>
+                </Link>
+              </>
             )}
 
             {isAuthenticated && user ? (

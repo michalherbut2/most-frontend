@@ -56,7 +56,7 @@ export default function AdminPage() {
       console.log("isAuthenticated", isAuthenticated);
       console.log("isAdmin", isAdmin);
       console.log("isLoading", isLoading);
-      
+
       router.push('/');
     }
   }, [isAuthenticated, isAdmin, isLoading, router]);
@@ -118,11 +118,11 @@ export default function AdminPage() {
       <div className="card">
         <h2 className="mb-4 text-lg font-semibold text-slate-900">Quick Actions</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <button className="rounded-lg border border-slate-200 bg-white p-4 text-left transition-smooth hover:border-purple-300 hover:bg-purple-50">
+          <a href="/admin/users" className="rounded-lg border border-slate-200 bg-white p-4 text-left transition-smooth hover:border-purple-300 hover:bg-purple-50">
             <Users className="h-5 w-5 text-purple-600" />
             <h3 className="mt-2 font-medium text-slate-900">Manage Users</h3>
             <p className="text-sm text-slate-600">View and edit user accounts</p>
-          </button>
+          </a>
           <button className="rounded-lg border border-slate-200 bg-white p-4 text-left transition-smooth hover:border-blue-300 hover:bg-blue-50">
             <Calendar className="h-5 w-5 text-blue-600" />
             <h3 className="mt-2 font-medium text-slate-900">Manage Events</h3>
