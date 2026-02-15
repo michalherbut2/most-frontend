@@ -16,6 +16,7 @@ import {
     BookOpen,
     Wand2,
 } from "lucide-react";
+import { format } from 'date-fns';
 
 const DAY_LABELS = ["Pn", "Wt", "Śr", "Czw", "Pt", "Sob", "Ndz"];
 const DAY_LABELS_FULL = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
@@ -30,7 +31,7 @@ function getMonday(date: Date): Date {
 }
 
 function formatISO(date: Date): string {
-    return date.toISOString().split("T")[0];
+    return format(date, 'yyyy-MM-dd');
 }
 
 function addDays(date: Date, days: number): Date {

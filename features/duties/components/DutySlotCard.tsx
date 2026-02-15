@@ -34,7 +34,7 @@ function SignUpModal({ slot, onClose }: SignUpModalProps) {
 
     const handleSubmit = () => {
         signUpMutation.mutate(
-            { slotId: slot.id, isAnonymous },
+            { slotId: slot.id, anonymous: isAnonymous },
             { onSuccess: () => onClose() }
         );
     };

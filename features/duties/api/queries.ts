@@ -59,10 +59,10 @@ export function useSignUp() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ slotId, isAnonymous }: { slotId: string; isAnonymous: boolean }) => {
+        mutationFn: async ({ slotId, anonymous }: { slotId: string; anonymous: boolean }) => {
             const data = await apiClient.post<DutySlot>(
                 `/duties/slots/${slotId}/sign-up`,
-                { isAnonymous }
+                { anonymous }
             );
             return data;
         },
