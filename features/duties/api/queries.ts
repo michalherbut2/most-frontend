@@ -157,3 +157,52 @@ export function useGenerateSundayKitchen() {
         },
     });
 }
+
+// ─── ADMIN: CREATE / DELETE ──────────────────────────────────────────────────
+
+export interface CreateSlotPayload {
+    title: string;
+    date: string;       // yyyy-MM-dd
+    time: string;       // HH:mm
+    category: DutyCategory;
+    capacity: number;
+    pointsValue: number;
+    autoApproved: boolean;
+}
+
+// 7. Ręcznie utwórz slot (Admin)
+export function useCreateDutySlot() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (payload: CreateSlotPayload) => {
+            const data = await apiClient.post<DutySlot>("/duties/slots", payload);
+            return data;
+        },
+        onSuccess: () => {
+            toast.success("Slot utworzony ✅");
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
+        },
+        onError: () => {
+            toast.error("Nie udało się utworzyć slotu.");
+        },
+    });
+}
+
+// 8. Usuń slot (Admin)
+export function useDeleteDutySlot() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (slotId: string) => {
+            await apiClient.delete(`/duties/slots/${slotId}`);
+        },
+        onSuccess: () => {
+            toast.success("Slot usunięty 🗑️");
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
+        },
+        onError: () => {
+            toast.error("Nie udało się usunąć slotu.");
+        },
+    });
+}

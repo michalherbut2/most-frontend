@@ -7,6 +7,7 @@ import {
     useGenerateLiturgyWeek,
 } from "@/features/duties/api/queries";
 import DutySlotCard from "@/features/duties/components/DutySlotCard";
+import CreateDutySlotDialog from "@/features/duties/components/CreateDutySlotDialog";
 import { useUserRole } from "@/shared/lib/hooks/useUserRole";
 import {
     ChevronLeft,
@@ -15,6 +16,7 @@ import {
     AlertTriangle,
     BookOpen,
     Wand2,
+    Plus,
 } from "lucide-react";
 import { format } from 'date-fns';
 
@@ -42,6 +44,7 @@ function addDays(date: Date, days: number): Date {
 
 export default function LiturgySchedulerPage() {
     const [weekOffset, setWeekOffset] = useState(0);
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
     const { isAdmin } = useUserRole();
     const generateMutation = useGenerateLiturgyWeek();
 
@@ -113,6 +116,13 @@ export default function LiturgySchedulerPage() {
                             <Wand2 className="w-4 h-4" />
                         )}
                         Generuj Sloty (Ten Tydzień)
+                    </button>
+                    <button
+                        onClick={() => setShowCreateDialog(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-white border border-purple-300 rounded-lg hover:bg-purple-50 transition-colors"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Dodaj Slot
                     </button>
                 </div>
             )}
@@ -221,6 +231,14 @@ export default function LiturgySchedulerPage() {
                         Na ten tydzień nie wygenerowano jeszcze grafiku liturgii.
                     </p>
                 </div>
+            )}
+
+            {/* Create Slot Dialog */}
+            {showCreateDialog && (
+                <CreateDutySlotDialog
+                    defaultCategory="LITURGY"
+                    onClose={() => setShowCreateDialog(false)}
+                />
             )}
         </div>
     );

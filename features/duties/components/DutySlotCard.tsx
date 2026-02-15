@@ -7,6 +7,7 @@ import {
     useSignUp,
     useCancelSignUp,
     useConfirmPresence,
+    useDeleteDutySlot,
 } from "@/features/duties/api/queries";
 import {
     Clock,
@@ -19,6 +20,8 @@ import {
     Eye,
     EyeOff,
     X,
+    Trash2,
+    AlertTriangle,
 } from "lucide-react";
 
 // ─── Sign-Up Modal ───────────────────────────────────────────────────────────
@@ -220,7 +223,9 @@ interface DutySlotCardProps {
 
 export default function DutySlotCard({ slot, isAdmin = false }: DutySlotCardProps) {
     const [showModal, setShowModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const cancelMutation = useCancelSignUp();
+    const deleteMutation = useDeleteDutySlot();
 
     const approvedVolunteers = slot.volunteers.filter((v) => v.status === "APPROVED");
 
@@ -237,14 +242,25 @@ export default function DutySlotCard({ slot, isAdmin = false }: DutySlotCardProp
                                 <span className="text-xs">{slot.time.slice(0, 5)}</span>
                             </div>
                         </div>
-                        {slot.pointsValue > 0 && (
-                            <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-200 rounded-full px-2 py-0.5">
-                                <Star className="w-3 h-3 text-yellow-500" />
-                                <span className="text-xs font-semibold text-yellow-700">
-                                    +{slot.pointsValue}
-                                </span>
-                            </div>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                            {isAdmin && (
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="p-1 rounded-lg hover:bg-red-50 transition-colors group"
+                                    title="Usuń slot"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5 text-gray-400 group-hover:text-red-500 transition-colors" />
+                                </button>
+                            )}
+                            {slot.pointsValue > 0 && (
+                                <div className="flex items-center gap-1 bg-yellow-50 border border-yellow-200 rounded-full px-2 py-0.5">
+                                    <Star className="w-3 h-3 text-yellow-500" />
+                                    <span className="text-xs font-semibold text-yellow-700">
+                                        +{slot.pointsValue}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Capacity Bar */}
@@ -295,6 +311,61 @@ export default function DutySlotCard({ slot, isAdmin = false }: DutySlotCardProp
             {/* Sign-Up Modal */}
             {showModal && (
                 <SignUpModal slot={slot} onClose={() => setShowModal(false)} />
+            )}
+
+            {/* Delete Confirm Dialog */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4">
+                        <div className="p-5 space-y-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-semibold text-gray-900">
+                                        Usunąć ten slot?
+                                    </h3>
+                                    <p className="text-sm text-gray-500 mt-0.5">
+                                        <span className="font-medium">{slot.title}</span>
+                                        {" · "}
+                                        {slot.time.slice(0, 5)}
+                                    </p>
+                                </div>
+                            </div>
+                            {slot.volunteers.length > 0 && (
+                                <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                                    ⚠️ Zapisani wolontariusze ({slot.volunteers.length}) zostaną automatycznie wypisani.
+                                </p>
+                            )}
+                        </div>
+                        <div className="flex items-center justify-end gap-3 px-5 pb-5">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                disabled={deleteMutation.isPending}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                            >
+                                Anuluj
+                            </button>
+                            <button
+                                onClick={() => {
+                                    deleteMutation.mutate(slot.id, {
+                                        onSuccess: () => setShowDeleteConfirm(false),
+                                    });
+                                }}
+                                disabled={deleteMutation.isPending}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {deleteMutation.isPending ? (
+                                    <Loader className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                )}
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );

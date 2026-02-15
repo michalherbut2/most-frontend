@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
     DutySlot,
     useDutySlots,
     useGenerateSundayKitchen,
 } from "@/features/duties/api/queries";
 import DutySlotCard from "@/features/duties/components/DutySlotCard";
+import CreateDutySlotDialog from "@/features/duties/components/CreateDutySlotDialog";
 import { useUserRole } from "@/shared/lib/hooks/useUserRole";
 import {
     Loader,
@@ -14,6 +15,7 @@ import {
     ChefHat,
     CalendarDays,
     Wand2,
+    Plus,
 } from "lucide-react";
 
 function formatISO(date: Date): string {
@@ -36,6 +38,7 @@ function calculateNextSunday(from: Date): Date {
 
 export default function CommunitySchedulerPage() {
     const { isAdmin } = useUserRole();
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
     const generateMutation = useGenerateSundayKitchen();
 
     // Pobierz sloty kuchenne na najbliższe 4 tygodnie
@@ -105,6 +108,13 @@ export default function CommunitySchedulerPage() {
                         )}
                         Generuj Niedzielę (Najbliższą)
                     </button>
+                    <button
+                        onClick={() => setShowCreateDialog(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-700 bg-white border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Dodaj Slot
+                    </button>
                 </div>
             )}
 
@@ -169,6 +179,14 @@ export default function CommunitySchedulerPage() {
                         Nie ma jeszcze zaplanowanych służb kuchennych.
                     </p>
                 </div>
+            )}
+
+            {/* Create Slot Dialog */}
+            {showCreateDialog && (
+                <CreateDutySlotDialog
+                    defaultCategory="KITCHEN"
+                    onClose={() => setShowCreateDialog(false)}
+                />
             )}
         </div>
     );
