@@ -4,13 +4,14 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import {
     DutyCategory,
-    CreateSlotPayload,
-    useCreateDutySlot,
+    DutySlot,
+    UpdateSlotPayload,
+    useUpdateDutySlot,
 } from "@/features/duties/api/queries";
-import { X, Plus, Loader } from "lucide-react";
+import { X, Pencil, Loader } from "lucide-react";
 
-interface CreateDutySlotDialogProps {
-    defaultCategory?: DutyCategory;
+interface EditDutySlotDialogProps {
+    slot: DutySlot;
     onClose: () => void;
 }
 
@@ -24,11 +25,11 @@ interface FormValues {
     autoApproved: boolean;
 }
 
-export default function CreateDutySlotDialog({
-    defaultCategory = "OTHER",
+export default function EditDutySlotDialog({
+    slot,
     onClose,
-}: CreateDutySlotDialogProps) {
-    const createMutation = useCreateDutySlot();
+}: EditDutySlotDialogProps) {
+    const updateMutation = useUpdateDutySlot();
 
     const {
         register,
@@ -36,46 +37,47 @@ export default function CreateDutySlotDialog({
         formState: { errors },
     } = useForm<FormValues>({
         defaultValues: {
-            title: "",
-            date: "",
-            time: "18:00",
-            category: defaultCategory,
-            capacity: 1,
-            pointsValue: 0,
-            autoApproved: false,
+            title: slot.title,
+            date: slot.date,
+            time: slot.time.slice(0, 5),
+            category: slot.category,
+            capacity: slot.capacity,
+            pointsValue: slot.pointsValue,
+            autoApproved: slot.isAutoApproved,
         },
     });
 
     const onSubmit = (data: FormValues) => {
-        const payload: CreateSlotPayload = {
+        const payload: UpdateSlotPayload = {
+            id: slot.id,
             ...data,
             capacity: Number(data.capacity),
             pointsValue: Number(data.pointsValue),
         };
-        createMutation.mutate(payload, { onSuccess: () => onClose() });
+        updateMutation.mutate(payload, { onSuccess: () => onClose() });
     };
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4">
+            <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md sm:mx-4">
                 {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                            <Plus className="w-4 h-4 text-green-600" />
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <Pencil className="w-4 h-4 text-blue-600" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900">
-                            Dodaj Slot
+                            Edytuj Slot
                         </h3>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-400" />
                     </button>
@@ -90,8 +92,7 @@ export default function CreateDutySlotDialog({
                         </label>
                         <input
                             {...register("title", { required: "Tytuł jest wymagany" })}
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                            placeholder="np. Czytanie 1"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                         />
                         {errors.title && (
                             <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
@@ -106,9 +107,8 @@ export default function CreateDutySlotDialog({
                             </label>
                             <input
                                 type="date"
-                                min={new Date().toISOString().slice(0, 10)}
                                 {...register("date", { required: "Data jest wymagana" })}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             />
                             {errors.date && (
                                 <p className="text-xs text-red-500 mt-1">{errors.date.message}</p>
@@ -121,7 +121,7 @@ export default function CreateDutySlotDialog({
                             <input
                                 type="time"
                                 {...register("time", { required: "Godzina jest wymagana" })}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             />
                             {errors.time && (
                                 <p className="text-xs text-red-500 mt-1">{errors.time.message}</p>
@@ -136,7 +136,7 @@ export default function CreateDutySlotDialog({
                         </label>
                         <select
                             {...register("category")}
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white"
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
                         >
                             <option value="LITURGY">Liturgia</option>
                             <option value="KITCHEN">Kuchnia</option>
@@ -158,7 +158,7 @@ export default function CreateDutySlotDialog({
                                     min: { value: 1, message: "Min. 1" },
                                     valueAsNumber: true,
                                 })}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             />
                             {errors.capacity && (
                                 <p className="text-xs text-red-500 mt-1">{errors.capacity.message}</p>
@@ -175,7 +175,7 @@ export default function CreateDutySlotDialog({
                                     min: { value: 0, message: "Min. 0" },
                                     valueAsNumber: true,
                                 })}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                             />
                             {errors.pointsValue && (
                                 <p className="text-xs text-red-500 mt-1">
@@ -186,11 +186,11 @@ export default function CreateDutySlotDialog({
                     </div>
 
                     {/* Auto-approved checkbox */}
-                    <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <label className="flex items-center gap-3 cursor-pointer select-none min-h-[44px]">
                         <input
                             type="checkbox"
                             {...register("autoApproved")}
-                            className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4"
+                            className="rounded text-blue-600 focus:ring-blue-500 w-5 h-5"
                         />
                         <span className="text-sm text-gray-700">
                             Automatyczne zatwierdzanie zgłoszeń
@@ -202,22 +202,22 @@ export default function CreateDutySlotDialog({
                         <button
                             type="button"
                             onClick={onClose}
-                            disabled={createMutation.isPending}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                            disabled={updateMutation.isPending}
+                            className="px-4 py-2.5 md:py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl md:rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
                         >
                             Anuluj
                         </button>
                         <button
                             type="submit"
-                            disabled={createMutation.isPending}
-                            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                            disabled={updateMutation.isPending}
+                            className="px-4 py-2.5 md:py-2 text-sm font-medium text-white bg-blue-600 rounded-xl md:rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
                         >
-                            {createMutation.isPending ? (
+                            {updateMutation.isPending ? (
                                 <Loader className="w-4 h-4 animate-spin" />
                             ) : (
-                                <Plus className="w-4 h-4" />
+                                <Pencil className="w-4 h-4" />
                             )}
-                            Dodaj
+                            Zapisz
                         </button>
                     </div>
                 </form>

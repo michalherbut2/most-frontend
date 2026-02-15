@@ -6,7 +6,7 @@ import {
     useDutySlots,
     useGenerateLiturgyWeek,
 } from "@/features/duties/api/queries";
-import DutySlotCard from "@/features/duties/components/DutySlotCard";
+import DutySlotCard from "@/features/duties/components/DutyCard";
 import CreateDutySlotDialog from "@/features/duties/components/CreateDutySlotDialog";
 import { useUserRole } from "@/shared/lib/hooks/useUserRole";
 import {
@@ -177,7 +177,7 @@ export default function LiturgySchedulerPage() {
 
             {/* Week Grid */}
             {!isLoading && !isError && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3">
                     {Array.from({ length: 7 }).map((_, dayIdx) => {
                         const dayDate = addDays(monday, dayIdx);
                         const daySlots = slotsByDay[dayIdx] ?? [];

@@ -6,7 +6,7 @@ import {
     useDutySlots,
     useGenerateSundayKitchen,
 } from "@/features/duties/api/queries";
-import DutySlotCard from "@/features/duties/components/DutySlotCard";
+import DutySlotCard from "@/features/duties/components/DutyCard";
 import CreateDutySlotDialog from "@/features/duties/components/CreateDutySlotDialog";
 import { useUserRole } from "@/shared/lib/hooks/useUserRole";
 import {
@@ -16,6 +16,7 @@ import {
     CalendarDays,
     Wand2,
     Plus,
+    History,
 } from "lucide-react";
 
 function formatISO(date: Date): string {
@@ -39,10 +40,19 @@ function calculateNextSunday(from: Date): Date {
 export default function CommunitySchedulerPage() {
     const { isAdmin } = useUserRole();
     const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
     const generateMutation = useGenerateSundayKitchen();
 
-    // Pobierz sloty kuchenne na najbliższe 4 tygodnie
-    const dateFrom = useMemo(() => formatISO(new Date()), []);
+    // When history toggled: go 30 days back, otherwise start today
+    const dateFrom = useMemo(() => {
+        if (showHistory) {
+            const d = new Date();
+            d.setDate(d.getDate() - 30);
+            return formatISO(d);
+        }
+        return formatISO(new Date());
+    }, [showHistory]);
+
     const dateTo = useMemo(() => {
         const d = new Date();
         d.setDate(d.getDate() + 28);
@@ -52,7 +62,8 @@ export default function CommunitySchedulerPage() {
     const { data: slots, isLoading, isError, refetch } = useDutySlots(
         "KITCHEN",
         dateFrom,
-        dateTo
+        dateTo,
+        showHistory
     );
 
     // Grupuj sloty wg daty
@@ -74,7 +85,7 @@ export default function CommunitySchedulerPage() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="max-w-5xl mx-auto px-4 py-8">
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
@@ -90,7 +101,7 @@ export default function CommunitySchedulerPage() {
 
             {/* Admin Toolbar */}
             {isAdmin && (
-                <div className="mb-6 flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3">
+                <div className="mb-6 flex flex-wrap items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3">
                     <div className="flex items-center gap-2 text-sm font-medium text-orange-700">
                         <Wand2 className="w-4 h-4" />
                         <span>Panel admina</span>
@@ -114,6 +125,19 @@ export default function CommunitySchedulerPage() {
                     >
                         <Plus className="w-4 h-4" />
                         Dodaj Slot
+                    </button>
+
+                    {/* History Toggle */}
+                    <div className="h-5 w-px bg-orange-200" />
+                    <button
+                        onClick={() => setShowHistory((prev) => !prev)}
+                        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${showHistory
+                                ? "text-white bg-orange-600 hover:bg-orange-700"
+                                : "text-orange-700 bg-white border border-orange-300 hover:bg-orange-50"
+                            }`}
+                    >
+                        <History className="w-4 h-4" />
+                        {showHistory ? "Ukryj historię" : "Pokaż historię"}
                     </button>
                 </div>
             )}
@@ -159,7 +183,7 @@ export default function CommunitySchedulerPage() {
                                         {label}
                                     </h2>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {grouped[dateStr].map((slot: DutySlot) => (
                                         <DutySlotCard key={slot.id} slot={slot} isAdmin={isAdmin} />
                                     ))}

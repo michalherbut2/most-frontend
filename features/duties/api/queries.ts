@@ -40,13 +40,13 @@ export const dutyKeys = {
 // ─── HOOKS ───────────────────────────────────────────────────────────────────
 
 // 1. Pobierz sloty (filtrowane po kategorii i zakresie dat)
-export function useDutySlots(category: DutyCategory, dateFrom: string, dateTo: string) {
+export function useDutySlots(category: DutyCategory, dateFrom: string, dateTo: string, includePast = false) {
     return useQuery({
-        queryKey: dutyKeys.slots(category, dateFrom, dateTo),
+        queryKey: [...dutyKeys.slots(category, dateFrom, dateTo), includePast],
         queryFn: async () => {
             // apiClient interceptor unwraps response.data automatically
             const data = await apiClient.get("/duties/slots", {
-                params: { category, dateFrom, dateTo },
+                params: { category, dateFrom, dateTo, includePast },
             });
             return data as unknown as DutySlot[];
         },
@@ -203,6 +203,49 @@ export function useDeleteDutySlot() {
         },
         onError: () => {
             toast.error("Nie udało się usunąć slotu.");
+        },
+    });
+}
+
+// ─── ADMIN: UPDATE ──────────────────────────────────────────────────────────
+
+export type UpdateSlotPayload = CreateSlotPayload & { id: string };
+
+// 9. Edytuj slot (Admin)
+export function useUpdateDutySlot() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, ...payload }: UpdateSlotPayload) => {
+            const data = await apiClient.put<DutySlot>(`/duties/slots/${id}`, payload);
+            return data;
+        },
+        onSuccess: () => {
+            toast.success("Slot zaktualizowany ✏️");
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
+        },
+        onError: () => {
+            toast.error("Nie udało się zaktualizować slotu.");
+        },
+    });
+}
+
+// ─── ADMIN: APPROVE VOLUNTEER ───────────────────────────────────────────────
+
+// 10. Zatwierdź wolontariusza (PENDING → APPROVED)
+export function useApproveVolunteer() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (volunteerId: string) => {
+            await apiClient.put(`/duties/volunteers/${volunteerId}/approve`);
+        },
+        onSuccess: () => {
+            toast.success("Wolontariusz zatwierdzony ✅");
+            queryClient.invalidateQueries({ queryKey: dutyKeys.all });
+        },
+        onError: () => {
+            toast.error("Nie udało się zatwierdzić wolontariusza.");
         },
     });
 }
